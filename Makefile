@@ -27,8 +27,8 @@ dbus: libexpat
 	
 libexpat:
 	@echo "Building $@."
-	cd $(LIBEXPAT_SRC_PATH); ./configure CC=$(CC)gcc --host=$(HOST) --target=$(TARGET) --prefix=$(LIBEXPAT_INSTALL_DIR)  
-	$(MAKE) -C $(APP_LIBEXPAT_DIR) && $(MAKE) -C $(APP_LIBEXPAT_DIR) install 
+	cd $(LIBEXPAT_SRC_PATH); ./configure CC=$(CC) --host=$(HOST) --target=$(TARGET) --prefix=$(LIBEXPAT_INSTALL_DIR)  
+	$(MAKE) -C $(LIBEXPAT_SRC_PATH) && $(MAKE) -C $(LIBEXPAT_SRC_PATH) install 
 	
 clean:
 	$(MAKE) -C $(LIBEXPAT_SRC_PATH) clean 
