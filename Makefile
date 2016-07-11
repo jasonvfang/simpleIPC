@@ -12,28 +12,42 @@ RM := rm
 CC := $(CC)
 HOST := $(HOST)
 TARGET := $(TARGET)
+CONFIG_FLAG := .configured
+
 
 .PHONY:all clean prepare dbus
 
 all: prepare dbus 
 
 prepare:
-	$(MKDIR) -p $(BUILD_DIR)	
+	$(MKDIR) -p $(BUILD_DIR);\
+	if [ ! -f .configured ]; then \
+		cd $(LIBEXPAT_SRC_PATH); ./configure CC=$(CC) --host=$(HOST) --target=$(TARGET) --prefix=$(LIBEXPAT_INSTALL_DIR); \
+		cd $(DBUS_SRC_PATH); ./configure CC=$(CC) --host=$(HOST) --target=$(TARGET) --prefix=$(DBUS_INSTALL_DIR) CPPFLAGS=-I$(LIBEXPAT_INSTALL_DIR)/include LIBS=-lexpat LDFLAGS=-L$(LIBEXPAT_INSTALL_DIR)/lib --without-x  --disable-tests; \
+	fi;\
+	touch $(CONFIG_FLAG) 
+	
 	
 dbus: prepare libexpat
-	@echo "[2]Building $@."
-	cd $(DBUS_SRC_PATH); ./configure CC=$(CC) --host=$(HOST) --target=$(TARGET) --prefix=$(DBUS_INSTALL_DIR) CPPFLAGS=-I$(LIBEXPAT_INSTALL_DIR)/include LIBS=-lexpat LDFLAGS=-L$(LIBEXPAT_INSTALL_DIR)/lib --without-x  --disable-tests  
+	@echo "[0;32m"
+	@echo "--------------------------"
+	@echo "[*]Building $@."
+	@echo "--------------------------"
+	@echo "[0m"
 	$(MAKE) -C $(DBUS_SRC_PATH) && $(MAKE) -C $(DBUS_SRC_PATH) install 
 	
 libexpat:
-	@echo "[1]Building $@."
-	cd $(LIBEXPAT_SRC_PATH); ./configure CC=$(CC) --host=$(HOST) --target=$(TARGET) --prefix=$(LIBEXPAT_INSTALL_DIR)  
+	@echo "[0;32m"
+	@echo "--------------------------"
+	@echo "[*]Building $@."
+	@echo "--------------------------"
+	@echo "[0m"
 	$(MAKE) -C $(LIBEXPAT_SRC_PATH) && $(MAKE) -C $(LIBEXPAT_SRC_PATH) install 
 	
 clean:
 	$(MAKE) -C $(LIBEXPAT_SRC_PATH) clean 
 	$(MAKE) -C $(DBUS_SRC_PATH) clean 
-	$(RM) -fr $(BUILD_DIR)
+	$(RM) -fr $(BUILD_DIR) $(CONFIG_FLAG) 
 	
 	
 	
