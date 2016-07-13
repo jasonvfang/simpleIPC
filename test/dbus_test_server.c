@@ -1,5 +1,7 @@
 #include <dbus/dbus.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 const int RES_SUCCESS = -1;
 const int RES_FAILED  = 0;
@@ -14,22 +16,19 @@ int my_dbus_initialization(char const * _bus_name, DBusConnection **_conn)
     *_conn = dbus_bus_get(DBUS_BUS_SESSION, &err);
     if(dbus_error_is_set(&err))
     {
-        printf("Connection Error(%s) \n", err.message);
+        printf("[%s]-[%d],Connection Error(%s) \n", __func__, __LINE__, err.message);
         dbus_error_free(&err);
         return RES_FAILED;
     }
 
     ret = dbus_bus_request_name(*_conn, _bus_name, DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
-    if(dbus_error_is_set(&err))
+    if(DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret)
     {
-        printf("Requece name error(%s) \n", err.message);
+        printf("[%s]-[%d],Requece name error(%s) \n", __func__, __LINE__, err.message);
         dbus_error_free(&err);
         return RES_FAILED;
     }
-    if(DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret)
-    {
-        return RES_FAILED;
-    }
+
     return RES_SUCCESS;
 }
 
@@ -39,15 +38,19 @@ int main(int agrc, char** argv)
     DBusError err;
     DBusMessage* msg;
     DBusMessageIter args;
-
+    
     dbus_error_init(&err);
     DBusConnection *conn;
+    
     if(RES_FAILED == my_dbus_initialization("test.method.server", &conn))
     {
         exit(1);
     }
 
+    //signal 1
     dbus_bus_add_match(conn, "type='signal', interface='test.signal.Type'", &err);
+    //signal 2
+    //dbus_bus_add_match(conn, "type='signal', interface='test.signal.Type'", &err);
 
     dbus_connection_flush(conn);
     if(dbus_error_is_set(&err))
@@ -75,13 +78,13 @@ int main(int agrc, char** argv)
             }
             else if(DBUS_TYPE_UINT32 != dbus_message_iter_get_arg_type(&args))
             {
-                printf("not a uint 32 type !\n");
+                printf("Server Recv Msg: not a uint 32 type !\n");
             }
             else
             {
                 dbus_uint32_t my_age = 0;
                 dbus_message_iter_get_basic(&args, &my_age);
-                printf("Got signal with value %d\n", my_age);
+                printf("Server Recv Msg: Got signal with value %d\n", my_age);
             }
         }
 

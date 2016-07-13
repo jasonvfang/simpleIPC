@@ -57,7 +57,7 @@ int my_dbus_send_sigal(DBusConnection * conn)
 
     dbus_message_iter_init_append(msg, &args);
 
-    printf("%s\n", sigvalue);
+    printf("Send value=[%s]\n", sigvalue);
     dbus_uint32_t my_age = 10;
     if(!dbus_message_iter_append_basic(&args, DBUS_TYPE_UINT32, &my_age))
     {
@@ -82,7 +82,7 @@ int main(int agrc, char** argv)
 {
     DBusConnection * conn;
 
-    printf("Start\n");
+    printf("Client Start\n");
     if(RES_FAILED == my_dbus_initialization("test.method.client", &conn))
     {
         exit(1);
